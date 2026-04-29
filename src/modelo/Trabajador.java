@@ -119,5 +119,6 @@ public class Trabajador {
 	public void setPuesto(String puesto) {
 		this.puesto = puesto;
 	}
-	
+
+
 }
