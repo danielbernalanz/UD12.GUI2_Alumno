@@ -35,6 +35,16 @@ public class Trabajador {
 		this.telefono = telefono;
 		this.puesto = puesto;
 	}
+
+	public Trabajador(String dni, String nombre, String apellidos, String direccion, String telefono, String puesto) {
+		this.dni = dni;
+		this.nombre = nombre;
+		this.apellidos = apellidos;
+		this.direccion = direccion;
+		this.telefono = telefono;
+		this.puesto = puesto;
+	}
+
 	/**
 	 * @return the identificador
 	 */

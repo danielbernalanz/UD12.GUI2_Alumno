@@ -32,7 +32,11 @@ public class AccesoTrabajador {
             sentencia.execute();
             System.out.println("Tabla creada");
             for (Trabajador trabajador : trabajadores) {
-                insertarTrabajador(conexion, trabajador);
+                if (AccesoTrabajador.consultarTrabajadorPorIdentificador(trabajador.getIdentificador()).isEmpty()){
+                    insertarTrabajador(conexion, trabajador);
+                } else {
+                    AccesoTrabajador.actualizarTrabajador(trabajador.getIdentificador(),trabajador.getNombre(),trabajador.getApellidos(),trabajador.getDireccion(),trabajador.getTelefono(), trabajador.getPuesto());
+                }
             }
             System.out.println("Trabajadores insertados");
         } catch (BDException | SQLException | TrabajadorException e) {
@@ -48,12 +52,13 @@ public class AccesoTrabajador {
         String sql = "INSERT INTO trabajador(dni,nombre,apellidos,direccion,telefono,puesto) VALUES(?,?,?,?,?,?)";
 
         PreparedStatement sentencia = conexion.prepareStatement(sql);
-        sentencia.setString(1, trabajador.getDni());
-        sentencia.setString(2, trabajador.getNombre());
-        sentencia.setString(3, trabajador.getApellidos());
-        sentencia.setString(4, trabajador.getDireccion());
-        sentencia.setString(5, trabajador.getTelefono());
-        sentencia.setString(6, trabajador.getPuesto());
+
+            sentencia.setString(1, trabajador.getDni());
+            sentencia.setString(2, trabajador.getNombre());
+            sentencia.setString(3, trabajador.getApellidos());
+            sentencia.setString(4, trabajador.getDireccion());
+            sentencia.setString(5, trabajador.getTelefono());
+            sentencia.setString(6, trabajador.getPuesto());
 
         int filas = sentencia.executeUpdate();
         if (filas == 0) {
@@ -110,16 +115,16 @@ public class AccesoTrabajador {
             throw new BDException(BDException.ERROR_QUERY + e.getMessage());
         }
     }
-    public static List<Trabajador> consultarLibrosPorTrabajador(String identificador) throws BDException, TrabajadorException {
+    public static List<Trabajador> consultarTrabajadorPorIdentificador(int identificador) throws BDException, TrabajadorException {
         Connection conexion = null;
         List<Trabajador> listaTrabajadores = new ArrayList<>();
 
         try {
             conexion = ConfigMySql.abrirConexion();
 
-            String sql = "SELECT * FROM trabajdor where identificador = ? ;";
+            String sql = "SELECT * FROM trabajador where identificador = ? ;";
             PreparedStatement sentencia = conexion.prepareStatement(sql);
-            sentencia.setString(1, identificador);
+            sentencia.setInt(1, identificador);
             ResultSet rs = sentencia.executeQuery();
 
             while (rs.next()) {
@@ -158,7 +163,7 @@ public class AccesoTrabajador {
             // TODO Test git pushes
             conexion = ConfigMySql.abrirConexion();
 
-            String sql = "SELECT * FROM libro;";
+            String sql = "SELECT * FROM trabajador;";
             PreparedStatement sentencia = conexion.prepareStatement(sql);
             ResultSet rs = sentencia.executeQuery();
             while (rs.next()) {

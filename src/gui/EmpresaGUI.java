@@ -10,12 +10,17 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 
+import dao.AccesoTrabajador;
+import debug.Debug;
 import dialogs.AltaDialog;
 import dialogs.BajaDialog;
 import dialogs.ListarDialog;
 import dialogs.ModificaDialog;
 import dialogs.VerDialog;
+import excepciones.BDException;
+import excepciones.TrabajadorException;
 import ficheros.FicheroDatos;
+import init.ExportarArchivoDatABDD;
 import modelo.Empresa;
 import modelo.Trabajador;
 
@@ -39,8 +44,17 @@ public class EmpresaGUI extends JFrame implements ActionListener {
 		super("Gestión de personal");
 
 		// Carga los trabajadores leidos de un fichero a memoria
-		ArrayList<Trabajador> trabaj = FicheroDatos.obtenerTrabajadores("ficheroDatos\\empresa.dat");
-		empresa = new Empresa(trabaj);
+        try {
+			Debug.eliminarTodo();
+           ExportarArchivoDatABDD.init();
+			ArrayList<Trabajador> trabaj = new ArrayList<>(AccesoTrabajador.consultarTrabajadores());
+			System.out.println("Datos volcados de archivo .dat a BDD");
+			empresa = new Empresa(trabaj);
+		} catch (BDException  | TrabajadorException e) {
+			System.err.println(e.getMessage());
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 
 		// Tamaño JFrame
 		setSize(800, 750);
@@ -94,16 +108,22 @@ public class EmpresaGUI extends JFrame implements ActionListener {
 		} else if (e.getSource() == bajaTrabajador) {
 			new BajaDialog(empresa);
 		} else if (e.getSource() == modificaTrabajador) {
-			//new ModificaDialog(empresa);
+			new ModificaDialog(empresa);
 		} else if (e.getSource() == buscaTrabajador) {
-			//new VerDialog(empresa);
+			new VerDialog(empresa);
 		} else if (e.getSource() == listarTrabajadores) {
 			new ListarDialog(empresa);
 		}
 		// Cuando se sale se vuelca a fichero.
 		else if (e.getSource() == salir) {
-			FicheroDatos.escribirTrabajadores("ficheroDatos\\empresa.dat", empresa.getTrabajadores());
-			System.exit(0);
+            try {
+                FicheroDatos.escribirTrabajadores("ficheroDatos\\empresa.dat", (ArrayList<Trabajador>) AccesoTrabajador.consultarTrabajadores());
+            } catch (BDException | TrabajadorException ex) {
+				System.err.println(ex.getMessage());
+            }catch (Exception ex2){
+				throw new RuntimeException(ex2.getMessage());
+			}
+            System.exit(0);
 		}
 	}
 

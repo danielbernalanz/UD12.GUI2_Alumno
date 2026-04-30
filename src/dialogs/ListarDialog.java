@@ -51,7 +51,6 @@ public class ListarDialog extends JDialog implements ActionListener {
 		cerrar = new JButton("Cerrar");
 		cerrar.addActionListener(this);
 		add(cerrar);
-
 		setVisible(true);
 	}
 
