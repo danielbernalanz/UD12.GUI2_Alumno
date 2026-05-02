@@ -45,7 +45,7 @@ public class EmpresaGUI extends JFrame implements ActionListener {
 
 		// Carga los trabajadores leidos de un fichero a memoria
         try {
-			Debug.eliminarTodo();
+			//Debug.eliminarTodo();
            ExportarArchivoDatABDD.init();
 			ArrayList<Trabajador> trabaj = new ArrayList<>(AccesoTrabajador.consultarTrabajadores());
 			System.out.println("Datos volcados de archivo .dat a BDD");
