@@ -48,7 +48,7 @@ public class AccesoTrabajador {
         }
     }
 
-    public static void insertarTrabajador(Connection conexion, Trabajador trabajador) throws SQLException, TrabajadorException {
+    public static boolean insertarTrabajador(Connection conexion, Trabajador trabajador) throws SQLException {
         String sql = "INSERT INTO trabajador(dni,nombre,apellidos,direccion,telefono,puesto) VALUES(?,?,?,?,?,?)";
 
         PreparedStatement sentencia = conexion.prepareStatement(sql);
@@ -62,8 +62,10 @@ public class AccesoTrabajador {
 
         int filas = sentencia.executeUpdate();
         if (filas == 0) {
-            throw new TrabajadorException(TrabajadorException.NO_ANADIDO);
+        return false;
         }
+        return true;
+
     }
 
     public static void eliminarTrabajador(String identificador) throws BDException, TrabajadorException {
@@ -181,9 +183,6 @@ public class AccesoTrabajador {
             }
             rs.close();
             sentencia.close();
-            if (listaTrabajador.isEmpty()){
-                throw new TrabajadorException(TrabajadorException.SIN_RESULTADOS);
-            }
         } catch (SQLException e) {
             throw new BDException(BDException.ERROR_QUERY + e.getMessage());
         }  finally {

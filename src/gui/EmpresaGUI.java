@@ -44,17 +44,18 @@ public class EmpresaGUI extends JFrame implements ActionListener {
 		super("Gestión de personal");
 
 		// Carga los trabajadores leidos de un fichero a memoria
+		ArrayList<Trabajador> trabaj = new ArrayList<>();
         try {
 			//Debug.eliminarTodo();
            ExportarArchivoDatABDD.init();
-			ArrayList<Trabajador> trabaj = new ArrayList<>(AccesoTrabajador.consultarTrabajadores());
+		   trabaj = new ArrayList<>(AccesoTrabajador.consultarTrabajadores());
 			System.out.println("Datos volcados de archivo .dat a BDD");
-			empresa = new Empresa(trabaj);
 		} catch (BDException  | TrabajadorException e) {
 			System.err.println(e.getMessage());
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+			empresa = new Empresa(trabaj);
 
 		// Tamaño JFrame
 		setSize(800, 750);
