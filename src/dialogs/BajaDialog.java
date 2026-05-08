@@ -15,6 +15,9 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
+import dao.AccesoTrabajador;
+import excepciones.BDException;
+import excepciones.TrabajadorException;
 import modelo.Empresa;
 
 /**
@@ -74,28 +77,24 @@ public class BajaDialog extends JDialog implements ActionListener {
 		// TODO Auto-generated method stub
 
 		if (e.getSource() == aceptar) {
-			int respuesta = JOptionPane.showConfirmDialog(null, "�Desea dar de baja el trabajador?", "Borrar",
+			int respuesta = JOptionPane.showConfirmDialog(null, "\u00bfDesea dar de baja el trabajador?", "Borrar",
 					JOptionPane.YES_NO_OPTION);
-			switch (respuesta) {
-			case JOptionPane.YES_OPTION:
+			if (respuesta == JOptionPane.YES_OPTION) {
 				try {
-					// Operaciones en caso afirmativo
-					if (empresa.bajaTrabajador(Integer.parseInt(areaIdentificador.getText()))) {
-						JOptionPane.showMessageDialog(this, "El trabajador se ha eliminado correctamente");
-					} else {
-						JOptionPane.showMessageDialog(null, "El trabajador no se encuentra en la lista", "Error",
-								JOptionPane.ERROR_MESSAGE);
-					}
-
-					break;
-				} catch (Exception e1) {
-					JOptionPane.showMessageDialog(null, "El ID debe ser un n�mero entero", "Error",
+					int id = Integer.parseInt(areaIdentificador.getText());
+					AccesoTrabajador.eliminarTrabajador(id);
+					empresa.bajaTrabajador(id);
+					JOptionPane.showMessageDialog(this, "El trabajador se ha eliminado correctamente");
+					dispose();
+				} catch (TrabajadorException ex) {
+					JOptionPane.showMessageDialog(null, "El trabajador no se encuentra en la base de datos", "Error",
+							JOptionPane.ERROR_MESSAGE);
+				} catch (BDException ex) {
+					JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+				} catch (NumberFormatException ex) {
+					JOptionPane.showMessageDialog(null, "El ID debe ser un n\u00famero entero", "Error",
 							JOptionPane.ERROR_MESSAGE);
 				}
-
-			case JOptionPane.NO_OPTION:
-				// Operaciones en caso negativo
-				break;
 			}
 		} else if (e.getSource() == cancelar) {
 			dispose();

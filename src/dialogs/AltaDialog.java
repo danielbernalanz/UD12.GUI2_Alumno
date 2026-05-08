@@ -186,6 +186,8 @@ public class AltaDialog extends JDialog implements ActionListener, ItemListener 
 
                     ConfigMySql.cerrarConexion(c);
 
+                    empresa.altaTrabajador(t);
+
                     JOptionPane.showMessageDialog(null, "Datos introducidos correctamente");
 
                 } catch (SQLException | BDException ex) {
@@ -210,7 +212,20 @@ public class AltaDialog extends JDialog implements ActionListener, ItemListener 
         if (dni.equals("") || dni.length() != 9) {
             JOptionPane.showMessageDialog(null, "El DNI debe tener longitud 9", "Error", JOptionPane.ERROR_MESSAGE);
             return false;
-        } else if (nombre.equals("")) {
+        }
+        String numeroStr = dni.substring(0, 8);
+        char letra = Character.toUpperCase(dni.charAt(8));
+        if (!numeroStr.matches("\\d{8}")) {
+            JOptionPane.showMessageDialog(null, "El DNI debe tener 8 d\u00edgitos seguidos de una letra", "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        String letras = "TRWAGMYFPDXBNJZSQVHLCKE";
+        int numero = Integer.parseInt(numeroStr);
+        if (letras.charAt(numero % 23) != letra) {
+            JOptionPane.showMessageDialog(null, "La letra del DNI no es v\u00e1lida", "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        if (nombre.equals("")) {
             JOptionPane.showMessageDialog(null, "Debe introducir el nombre del trabajador", "Error",
                     JOptionPane.ERROR_MESSAGE);
             return false;
@@ -219,11 +234,11 @@ public class AltaDialog extends JDialog implements ActionListener, ItemListener 
                     JOptionPane.ERROR_MESSAGE);
             return false;
         } else if (direccion.equals("")) {
-            JOptionPane.showMessageDialog(null, "Debe introducir la direcci�n del trabajador", "Error",
+            JOptionPane.showMessageDialog(null, "Debe introducir la direcci\u00f3n del trabajador", "Error",
                     JOptionPane.ERROR_MESSAGE);
             return false;
-        } else if (telefono.equals("") || telefono.length() != 9) {
-            JOptionPane.showMessageDialog(null, "El tel�fono debe tener longitud 9", "Error",
+        } else if (telefono.equals("") || telefono.length() != 9 || !telefono.matches("\\d{9}")) {
+            JOptionPane.showMessageDialog(null, "El tel\u00e9fono debe tener 9 d\u00edgitos", "Error",
                     JOptionPane.ERROR_MESSAGE);
             return false;
         } else if (puesto.equals("")) {

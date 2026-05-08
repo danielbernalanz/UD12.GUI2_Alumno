@@ -10,7 +10,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
-
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
@@ -18,6 +18,7 @@ import dao.AccesoTrabajador;
 import excepciones.BDException;
 import excepciones.TrabajadorException;
 import modelo.Empresa;
+import modelo.Trabajador;
 
 /**
  * 
@@ -28,28 +29,49 @@ public class ListarDialog extends JDialog implements ActionListener {
 
 	Empresa empresa;
 	JTable tabla;
+	JButton modificar;
 	JButton cerrar;
+	java.util.List<Trabajador> trabajadores;
 
-	public ListarDialog(Empresa empresa) throws TrabajadorException, BDException {
+	public ListarDialog(Empresa empresa) {
 		this.empresa = empresa;
 
 		setResizable(false);
-		// t�tulo del di�log
 		setTitle("Listado Trabajadores");
-		// tama�o
 		setSize(750, 700);
 		setLayout(new FlowLayout());
-		// colocaci�n en el centro de la pantalla
 		setLocationRelativeTo(null);
 
-		// Crea un JTable, cada fila será un trabajador
-		String[] columnas = { "Identificador", "DNI", "Nombre", "Apellidos", "Direcci�n", "Tel�fono", "Puesto" };
-		String[][] datos = AccesoTrabajador.consultarTrabajadores();
+		String[] columnas = { "Identificador", "DNI", "Nombre", "Apellidos", "Direcci\u00f3n", "Tel\u00e9fono", "Puesto" };
+		String[][] datos = null;
+
+		try {
+			trabajadores = AccesoTrabajador.consultarTrabajadores();
+			datos = new String[trabajadores.size()][7];
+			for (int i = 0; i < trabajadores.size(); i++) {
+				Trabajador t = trabajadores.get(i);
+				datos[i][0] = String.valueOf(t.getIdentificador());
+				datos[i][1] = t.getDni();
+				datos[i][2] = t.getNombre();
+				datos[i][3] = t.getApellidos();
+				datos[i][4] = t.getDireccion();
+				datos[i][5] = t.getTelefono();
+				datos[i][6] = t.getPuesto();
+			}
+		} catch (BDException | TrabajadorException e) {
+			JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+			dispose();
+			return;
+		}
+
 		tabla = new JTable(datos, columnas);
-		// Mete la tabla en un JCrollPane
 		JScrollPane jsp = new JScrollPane(tabla);
 		jsp.setPreferredSize(new Dimension(700, 600));
 		add(jsp);
+
+		modificar = new JButton("Modificar");
+		modificar.addActionListener(this);
+		add(modificar);
 
 		cerrar = new JButton("Cerrar");
 		cerrar.addActionListener(this);
@@ -59,8 +81,15 @@ public class ListarDialog extends JDialog implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
-		if (e.getSource() == cerrar) {
+		if (e.getSource() == modificar) {
+			int fila = tabla.getSelectedRow();
+			if (fila == -1) {
+				JOptionPane.showMessageDialog(this, "Seleccione una fila primero", "Error", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+			Trabajador t = trabajadores.get(fila);
+			new ModificaDialog(empresa, t);
+		} else if (e.getSource() == cerrar) {
 			dispose();
 		}
 	}

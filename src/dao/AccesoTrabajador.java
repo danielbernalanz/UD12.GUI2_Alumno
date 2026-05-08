@@ -68,7 +68,7 @@ public class AccesoTrabajador {
 
     }
 
-    public static void eliminarTrabajador(String identificador) throws BDException, TrabajadorException {
+    public static void eliminarTrabajador(int identificador) throws BDException, TrabajadorException {
         Connection conexion = null;
         int columnasEliminadas;
 
@@ -76,14 +76,13 @@ public class AccesoTrabajador {
             conexion = ConfigMySql.abrirConexion();
             String sentenciaEliminarTrabajador = "DELETE FROM trabajador WHERE identificador = ?;";
             PreparedStatement sentencia = conexion.prepareStatement(sentenciaEliminarTrabajador);
-            sentencia.setString(1, identificador);
+            sentencia.setInt(1, identificador);
             columnasEliminadas = sentencia.executeUpdate();
             sentencia.close();
             if (columnasEliminadas == 0) {
                 throw new TrabajadorException(TrabajadorException.NO_ELIMINADO);
             }
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
             throw new BDException(BDException.ERROR_QUERY + e.getMessage());
         } finally {
             if (conexion != null) {
