@@ -186,8 +186,6 @@ public class AltaDialog extends JDialog implements ActionListener, ItemListener 
 
                     ConfigMySql.cerrarConexion(c);
 
-                    empresa.altaTrabajador(t);
-
                     JOptionPane.showMessageDialog(null, "Datos introducidos correctamente");
 
                 } catch (SQLException | BDException ex) {

@@ -82,8 +82,12 @@ public class BajaDialog extends JDialog implements ActionListener {
 			if (respuesta == JOptionPane.YES_OPTION) {
 				try {
 					int id = Integer.parseInt(areaIdentificador.getText());
+					if (id <= 0) {
+						JOptionPane.showMessageDialog(null, "El ID debe ser un n\u00famero entero mayor que cero", "Error",
+								JOptionPane.ERROR_MESSAGE);
+						return;
+					}
 					AccesoTrabajador.eliminarTrabajador(id);
-					empresa.bajaTrabajador(id);
 					JOptionPane.showMessageDialog(this, "El trabajador se ha eliminado correctamente");
 					dispose();
 				} catch (TrabajadorException ex) {

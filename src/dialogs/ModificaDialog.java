@@ -289,9 +289,6 @@ public class ModificaDialog extends JDialog implements ActionListener, ItemListe
                 try {
                     int id = trabajador.getIdentificador();
                     AccesoTrabajador.actualizarTrabajador(id, nombre, apellidos, direccion, telefono, puesto);
-                    if (empresa.devolverPosicion(id) != -1) {
-                        empresa.modificarTrabajador(id, dni, nombre, apellidos, direccion, telefono, puesto);
-                    }
                     JOptionPane.showMessageDialog(null, "Datos modificados correctamente");
                     dispose();
                 } catch (BDException ex) {
