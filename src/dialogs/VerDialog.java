@@ -20,6 +20,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
 
 import dao.AccesoTrabajador;
 import excepciones.BDException;
@@ -144,6 +145,7 @@ public class VerDialog extends JDialog implements ActionListener, ItemListener {
 
         modeloTabla = new DefaultTableModel(datos, COLUMNAS);
         tabla = new JTable(modeloTabla);
+        tabla.setRowSorter(new TableRowSorter<>(modeloTabla));
         JScrollPane jsp = new JScrollPane(tabla);
         jsp.setPreferredSize(new Dimension(600, 200));
         add(jsp);
