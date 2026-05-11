@@ -29,7 +29,6 @@ public class ListarDialog extends JDialog implements ActionListener {
 
 	Empresa empresa;
 	JTable tabla;
-	JButton modificar;
 	JButton cerrar;
 	java.util.List<Trabajador> trabajadores;
 
@@ -69,10 +68,6 @@ public class ListarDialog extends JDialog implements ActionListener {
 		jsp.setPreferredSize(new Dimension(700, 600));
 		add(jsp);
 
-		modificar = new JButton("Modificar");
-		modificar.addActionListener(this);
-		add(modificar);
-
 		cerrar = new JButton("Cerrar");
 		cerrar.addActionListener(this);
 		add(cerrar);
@@ -81,15 +76,7 @@ public class ListarDialog extends JDialog implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == modificar) {
-			int fila = tabla.getSelectedRow();
-			if (fila == -1) {
-				JOptionPane.showMessageDialog(this, "Seleccione una fila primero", "Error", JOptionPane.ERROR_MESSAGE);
-				return;
-			}
-			Trabajador t = trabajadores.get(fila);
-			new ModificaDialog(empresa, t);
-		} else if (e.getSource() == cerrar) {
+		if (e.getSource() == cerrar) {
 			dispose();
 		}
 	}

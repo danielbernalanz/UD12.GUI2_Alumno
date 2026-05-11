@@ -1,11 +1,11 @@
 package dialogs;
 
+import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -23,6 +23,8 @@ import modelo.Trabajador;
 
 public class ModificaDialog extends JDialog implements ActionListener, ItemListener {
 
+    JLabel etiquetaIdentificador;
+    JComboBox comboIdentificador;
     JLabel etiquetaDni;
     JTextField areaDni;
     JLabel etiquetaNombre;
@@ -45,6 +47,7 @@ public class ModificaDialog extends JDialog implements ActionListener, ItemListe
     String telefono = "";
     String puesto = "Elija Puesto";
 
+    JPanel pIdentificador;
     JPanel pDni;
     JPanel pNombre;
     JPanel pApellidos;
@@ -52,9 +55,11 @@ public class ModificaDialog extends JDialog implements ActionListener, ItemListe
     JPanel pTelefono;
     JPanel pPuesto;
     JPanel pBotones;
+    JLabel labelError;
 
     Empresa empresa;
     Trabajador trabajador;
+    java.util.List<Trabajador> listaTrabajadores;
 
     public ModificaDialog(Empresa empresa, Trabajador trabajador) {
         this.empresa = empresa;
@@ -123,6 +128,9 @@ public class ModificaDialog extends JDialog implements ActionListener, ItemListe
         add(pTelefono);
         add(pPuesto);
 
+        labelError = new JLabel(" ");
+        add(labelError);
+
         guardar = new JButton("Guardar");
         guardar.addActionListener(this);
         pBotones.add(guardar);
@@ -139,37 +147,15 @@ public class ModificaDialog extends JDialog implements ActionListener, ItemListe
 
     public ModificaDialog(Empresa empresa) {
         this.empresa = empresa;
-
-        try {
-            String input = JOptionPane.showInputDialog(this, "Introduzca el ID del trabajador a modificar:");
-            if (input == null) {
-                dispose();
-                return;
-            }
-            int id = Integer.parseInt(input);
-            List<Trabajador> resultados = AccesoTrabajador.consultarTrabajadorPorIdentificador(id);
-            if (resultados.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Trabajador no encontrado", "Error", JOptionPane.ERROR_MESSAGE);
-                dispose();
-                return;
-            }
-            this.trabajador = resultados.get(0);
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "El ID debe ser un n\u00famero entero", "Error", JOptionPane.ERROR_MESSAGE);
-            dispose();
-            return;
-        } catch (BDException | TrabajadorException ex) {
-            JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            dispose();
-            return;
-        }
+        this.trabajador = null;
 
         setResizable(false);
         setTitle("Modificar Trabajador");
-        setSize(300, 350);
+        setSize(300, 400);
         setLayout(new FlowLayout());
         setLocationRelativeTo(null);
 
+        pIdentificador = new JPanel();
         pDni = new JPanel();
         pNombre = new JPanel();
         pApellidos = new JPanel();
@@ -178,33 +164,47 @@ public class ModificaDialog extends JDialog implements ActionListener, ItemListe
         pPuesto = new JPanel();
         pBotones = new JPanel();
 
+        try {
+            listaTrabajadores = AccesoTrabajador.consultarTrabajadores();
+        } catch (BDException | TrabajadorException e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            dispose();
+            return;
+        }
+
+        etiquetaIdentificador = new JLabel("Identificador  ");
+        comboIdentificador = new JComboBox();
+        comboIdentificador.addItem("Seleccione el identificador");
+        for (Trabajador t : listaTrabajadores) {
+            comboIdentificador.addItem(String.valueOf(t.getIdentificador()));
+        }
+        comboIdentificador.addItemListener(this);
+        pIdentificador.add(etiquetaIdentificador);
+        pIdentificador.add(comboIdentificador);
+
         etiquetaDni = new JLabel("DNI                 ");
         areaDni = new JTextField(15);
-        areaDni.setText(trabajador.getDni());
+        areaDni.setEditable(false);
         pDni.add(etiquetaDni);
         pDni.add(areaDni);
 
         etiquetaNombre = new JLabel("Nombre         ");
         areaNombre = new JTextField(15);
-        areaNombre.setText(trabajador.getNombre());
         pNombre.add(etiquetaNombre);
         pNombre.add(areaNombre);
 
         etiquetaApellidos = new JLabel("Apellidos      ");
         areaApellidos = new JTextField(15);
-        areaApellidos.setText(trabajador.getApellidos());
         pApellidos.add(etiquetaApellidos);
         pApellidos.add(areaApellidos);
 
         etiquetaDireccion = new JLabel("Direccion      ");
         areaDireccion = new JTextField(15);
-        areaDireccion.setText(trabajador.getDireccion());
         pDireccion.add(etiquetaDireccion);
         pDireccion.add(areaDireccion);
 
         etiquetaTelefono = new JLabel("Telefono       ");
         areaTelefono = new JTextField(15);
-        areaTelefono.setText(trabajador.getTelefono());
         pTelefono.add(etiquetaTelefono);
         pTelefono.add(areaTelefono);
 
@@ -216,16 +216,20 @@ public class ModificaDialog extends JDialog implements ActionListener, ItemListe
         comboPuesto.addItem("Analista");
         comboPuesto.addItem("Arquitecto");
         comboPuesto.addItem("Jefe de Proyecto");
-        comboPuesto.setSelectedItem(trabajador.getPuesto());
+        comboPuesto.setEnabled(false);
         comboPuesto.addItemListener(this);
         pPuesto.add(comboPuesto);
 
+        add(pIdentificador);
         add(pDni);
         add(pNombre);
         add(pApellidos);
         add(pDireccion);
         add(pTelefono);
         add(pPuesto);
+
+        labelError = new JLabel(" ");
+        add(labelError);
 
         guardar = new JButton("Guardar");
         guardar.addActionListener(this);
@@ -243,18 +247,45 @@ public class ModificaDialog extends JDialog implements ActionListener, ItemListe
 
     @Override
     public void itemStateChanged(ItemEvent e) {
-        puesto = comboPuesto.getSelectedItem().toString();
+        if (e.getSource() == comboIdentificador && e.getStateChange() == ItemEvent.SELECTED) {
+            int idx = comboIdentificador.getSelectedIndex() - 1;
+            if (idx >= 0 && idx < listaTrabajadores.size()) {
+                trabajador = listaTrabajadores.get(idx);
+                areaDni.setText(trabajador.getDni());
+                areaNombre.setText(trabajador.getNombre());
+                areaApellidos.setText(trabajador.getApellidos());
+                areaDireccion.setText(trabajador.getDireccion());
+                areaTelefono.setText(trabajador.getTelefono());
+                comboPuesto.setSelectedItem(trabajador.getPuesto());
+                areaDni.setEditable(true);
+                comboPuesto.setEnabled(true);
+                restaurarColores();
+                labelError.setText(" ");
+            }
+        } else if (e.getSource() == comboPuesto) {
+            puesto = comboPuesto.getSelectedItem().toString();
+        }
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == guardar) {
+            if (trabajador == null) {
+                JOptionPane.showMessageDialog(this, "Seleccione un trabajador primero", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             dni = areaDni.getText();
             nombre = areaNombre.getText();
             apellidos = areaApellidos.getText();
             direccion = areaDireccion.getText();
             telefono = areaTelefono.getText();
             if (comprobarErrores()) {
+                int confirm = JOptionPane.showConfirmDialog(this,
+                        "\u00bfEst\u00e1 seguro de que desea modificar los datos?",
+                        "Confirmar modificaci\u00f3n", JOptionPane.YES_NO_OPTION);
+                if (confirm != JOptionPane.YES_OPTION) {
+                    return;
+                }
                 try {
                     int id = trabajador.getIdentificador();
                     AccesoTrabajador.actualizarTrabajador(id, nombre, apellidos, direccion, telefono, puesto);
@@ -273,43 +304,56 @@ public class ModificaDialog extends JDialog implements ActionListener, ItemListe
     }
 
     public boolean comprobarErrores() {
+        restaurarColores();
+        labelError.setText(" ");
+
         if (dni.equals("") || dni.length() != 9) {
-            JOptionPane.showMessageDialog(null, "El DNI debe tener longitud 9", "Error", JOptionPane.ERROR_MESSAGE);
+            areaDni.setBackground(Color.PINK);
+            labelError.setText("El DNI debe tener longitud 9");
             return false;
         }
         String numeroStr = dni.substring(0, 8);
         char letra = Character.toUpperCase(dni.charAt(8));
         if (!numeroStr.matches("\\d{8}")) {
-            JOptionPane.showMessageDialog(null, "El DNI debe tener 8 d\u00edgitos seguidos de una letra", "Error", JOptionPane.ERROR_MESSAGE);
+            areaDni.setBackground(Color.PINK);
+            labelError.setText("El DNI debe tener 8 d\u00edgitos seguidos de una letra");
             return false;
         }
         String letras = "TRWAGMYFPDXBNJZSQVHLCKE";
         int numero = Integer.parseInt(numeroStr);
         if (letras.charAt(numero % 23) != letra) {
-            JOptionPane.showMessageDialog(null, "La letra del DNI no es v\u00e1lida", "Error", JOptionPane.ERROR_MESSAGE);
+            areaDni.setBackground(Color.PINK);
+            labelError.setText("La letra del DNI no es v\u00e1lida");
             return false;
         }
         if (nombre.equals("")) {
-            JOptionPane.showMessageDialog(null, "Debe introducir el nombre del trabajador", "Error",
-                    JOptionPane.ERROR_MESSAGE);
+            areaNombre.setBackground(Color.PINK);
+            labelError.setText("Debe introducir el nombre del trabajador");
             return false;
         } else if (apellidos.equals("")) {
-            JOptionPane.showMessageDialog(null, "Debe introducir los apellidos del trabajador", "Error",
-                    JOptionPane.ERROR_MESSAGE);
+            areaApellidos.setBackground(Color.PINK);
+            labelError.setText("Debe introducir los apellidos del trabajador");
             return false;
         } else if (direccion.equals("")) {
-            JOptionPane.showMessageDialog(null, "Debe introducir la direcci\u00f3n del trabajador", "Error",
-                    JOptionPane.ERROR_MESSAGE);
+            areaDireccion.setBackground(Color.PINK);
+            labelError.setText("Debe introducir la direcci\u00f3n del trabajador");
             return false;
         } else if (telefono.equals("") || telefono.length() != 9 || !telefono.matches("\\d{9}")) {
-            JOptionPane.showMessageDialog(null, "El tel\u00e9fono debe tener 9 d\u00edgitos", "Error",
-                    JOptionPane.ERROR_MESSAGE);
+            areaTelefono.setBackground(Color.PINK);
+            labelError.setText("El tel\u00e9fono debe tener 9 d\u00edgitos");
             return false;
         } else if (puesto.equals("") || puesto.equals("Elija Puesto")) {
-            JOptionPane.showMessageDialog(null, "Debe seleccionar un puesto", "Error",
-                    JOptionPane.ERROR_MESSAGE);
+            labelError.setText("Debe seleccionar un puesto");
             return false;
         }
         return true;
+    }
+
+    private void restaurarColores() {
+        areaDni.setBackground(Color.WHITE);
+        areaNombre.setBackground(Color.WHITE);
+        areaApellidos.setBackground(Color.WHITE);
+        areaDireccion.setBackground(Color.WHITE);
+        areaTelefono.setBackground(Color.WHITE);
     }
 }
