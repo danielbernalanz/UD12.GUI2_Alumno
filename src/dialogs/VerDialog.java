@@ -250,6 +250,10 @@ public class VerDialog extends JDialog implements ActionListener, ItemListener {
                 t.getDireccion(), t.getTelefono(), t.getPuesto()
             });
         }
+        if (datosFiltrados.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No se ha encontrado ning\u00fan trabajador con esos criterios.",
+                    "Sin resultados", JOptionPane.INFORMATION_MESSAGE);
+        }
     }
 
     private void restaurarColores() {
